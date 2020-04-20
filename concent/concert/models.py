@@ -1,7 +1,9 @@
 from django.db import models
+from multiselectfield import MultiSelectField
 
 
-# 티켓팅 사이트 일단 있는 대로 추가 (나중에 넣으려면 귀찮)
+# 티켓팅 사이트
+# 일단 있는 대로 추가 (나중에 넣으려면 귀찮)
 TICKETING_SITES = (
         ('Inpark', 'Interpark', ),
         ('Melon', 'Melon', ),
@@ -9,14 +11,27 @@ TICKETING_SITES = (
         ('Link', 'Ticketlink', ),
         ('Auction', 'Auction', ),
         ('Hana', 'Hanaticket', ),
-        )
+)
 
-# 장르는 지금 사용하지는 않으나 미래를 위해 필드는 만들어둠
+# 국내 지역
+REGIONS = (
+        ('Seoul', 'Seoul', ),
+        ('Gyeonggi', 'Gyeonggi', ),
+        ('Gangwon', 'Gangwon', ),
+        ('Chungcheong', 'Chungcheong', ),
+        ('Gyeongsang', 'Gyeongsang', ),
+        ('Jeolla', 'Jeolla', ),
+        ('Jeju', 'Jeju', ),
+)
+
+# 장르
+# 지금 쓰일지는 모르겠지만 일단 만들어둠
 # 가장 우선순위가 높은 2개의 티켓팅 사이트 기준
 # 인터파크티켓 : Ballad / Rock / Hiphop / Jazz,RnB / Trot,Folk / Foreign / Indie
 # (Elec, Dance 없음. Festival은 모두 수작업)
 # 멜론티켓 : Dance / Ballad,RnB / Hiphop,Elec / Indie,Rock / Foreign / Jazz,Trot,Folk
 # (Festival 중 타 장르 미분류는 수작업)
+# 장르 분류는 멜론티켓을 따름 (인팍이 더 세분화되어 있으므로 광범위한 분류에 꽂으면 됨)
 GENRES = (
         ('BalRnB', 'Ballad/RnB', ),
         ('Dance', 'Dance', ),
@@ -24,7 +39,7 @@ GENRES = (
         ('HipElec', 'Hiphop/Elec', ),
         ('Others', 'Jazz/Trot/Folk', ),
         ('Foreign', 'Foreign', ),
-        )
+)
 
 
 class Artist(models.Model):
@@ -47,23 +62,27 @@ class Artist(models.Model):
 
 
 class Concert(models.Model):
-    info_source = models.CharField(
+    info_source = MultiSelectField(
             verbose_name='Info Source Site',
             choices=TICKETING_SITES,
-            max_length=15,
             )
     detail_url = models.CharField(
             verbose_name='Detail Page URL',
             max_length=255,
             )
-    artists = models.ManyToManyField(
-            verbose_name='Artists in Concert',
-            to=Artist,
-            )
     concert_name = models.CharField(
             verbose_name='Concert Name',
             max_length=127,
             unique=True,
+            )
+    concert_genre = models.CharField(
+            verbose_name='Concert Genre',
+            choices=GENRES,
+            max_length=15,
+            )
+    artists = models.ManyToManyField(
+            verbose_name='Artists in Concert',
+            to=Artist,
             )
     location = models.CharField(
             verbose_name='Concert Location',
@@ -73,6 +92,11 @@ class Concert(models.Model):
             verbose_name='Concert Location Address',
             max_length=255,
             null=True,
+            )
+    region = models.CharField(
+            verbose_name='Concert Region',
+            choices=REGIONS,
+            max_length=15,
             )
     start_date = models.DateField(
             verbose_name='Concert Starting Date',

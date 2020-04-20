@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from multiselectfield import MultiSelectField
 
 from concert.models import *
 
@@ -34,6 +35,7 @@ class UserManager(BaseUserManager):
 class User(AbstractBaseUser, PermissionsMixin):
     objects = UserManager()
 
+    # 필수 정보 (이메일, 아이디)
     email = models.EmailField(
             max_length=255,
             unique=True,
@@ -43,6 +45,31 @@ class User(AbstractBaseUser, PermissionsMixin):
             null=False,
             unique=True,
             )
+
+    # 개인화에 이용되는 정보 (선호장르, 거주지역)
+    preferred_genres = MultiSelectField(
+            verbose_name='User Preffered Genres',
+            choices=GENRES,
+            null=True,
+            )
+    region = models.CharField(
+            verbose_name='User Address Region',
+            choices=REGIONS,
+            max_length=15,
+            null=True,
+            )
+    
+    # 북마크 정보 (콘서트, 가수)
+    concerts = models.ManyToManyField(
+            verbose_name='Bookmarked Concerts',
+            to=Concert,
+            )
+    artists = models.ManyToManyField(
+            verbose_name='Bookmarked Artists',
+            to=Artist,
+            )
+
+    # 관리 정보
     is_active = models.BooleanField(
             default=True,
             )
@@ -57,15 +84,6 @@ class User(AbstractBaseUser, PermissionsMixin):
             )
     date_joined = models.DateTimeField(
             auto_now_add=True,
-            )
-    
-    concerts = models.ManyToManyField(
-            verbose_name='Bookmarked Concerts',
-            to=Concert,
-            )
-    artists = models.ManyToManyField(
-            verbose_name='Bookmarked Artists',
-            to=Artist,
             )
 
     USERNAME_FIELD = 'username'

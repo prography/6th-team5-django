@@ -1,8 +1,6 @@
 from rest_framework.generics import ListAPIView, RetrieveAPIView
-from django.contrib.auth.models import User
+from .models import User
 from .serializers import UserSerializer
-
-# Create your views here.
 
 
 class UserList(ListAPIView):
